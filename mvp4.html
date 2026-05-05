@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>治愈小岛 · 情绪自律伴侣</title>
+  <style>
+    /* ========== 全局变量 & 治愈色系 ========== */
+    :root {
+      --bg-primary: #FAF7F2;
+      --bg-card: rgba(255, 255, 255, 0.7);
+      --text-primary: #4A4A48;
+      --text-secondary: #8E8C88;
+      --accent-mint: #B0C4B8;
+      --accent-blue: #B7C9D9;
+      --accent-oat: #D9CFC0;
+      --shadow-soft: 0 4px 20px rgba(0,0,0,0.02);
+      --blur-bg: blur(10px);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 18px;
+      --radius-sm: 14px;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* 护眼暗色模式 */
+    body.dark-mode {
+      --bg-primary: #2C2C2A;
+      --bg-card: rgba(50, 50, 48, 0.7);
+      --text-primary: #E0DED8;
+      --text-secondary: #9A9894;
+      --accent-mint: #7F9387;
+      --accent-blue: #7A8FA0;
+      --accent-oat: #9E9488;
+      --shadow-soft: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color 0.4s ease, color 0.4s ease;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 20px 100px;
+      position: relative;
+      animation: fadeInPage 0.5s ease;
+    }
+
+    @keyframes fadeInPage {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========== 通用卡片 ========== */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: var(--blur-bg);
+      -webkit-backdrop-filter: var(--blur-bg);
+      border-radius: var(--radius-xl);
+      padding: 28px 24px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(200, 195, 188, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    /* ========== 治愈按钮 ========== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-mint);
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 12px rgba(176, 196, 184, 0.2);
+      font-family: var(--font-family);
+    }
+    .btn:active {
+      transform: scale(0.96);
+      opacity: 0.9;
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--accent-mint);
+      border: 1.5px solid var(--accent-mint);
+      box-shadow: none;
+    }
+    .btn-sm {
+      padding: 10px 20px;
+      font-size: 14px;
+      border-radius: 30px;
+    }
+
+    /* ========== 输入框 ========== */
+    input[type="text"], textarea {
+      width: 100%;
+      border: 1.5px solid rgba(180, 175, 165, 0.2);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      font-size: 16px;
+      background: rgba(255,255,255,0.5);
+      backdrop-filter: blur(4px);
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.3s ease;
+      font-family: var(--font-family);
+    }
+    input:focus, textarea:focus {
+      border-color: var(--accent-mint);
+      background: rgba(255,255,255,0.8);
+      box-shadow: 0 0 0 4px rgba(176, 196, 184, 0.1);
+    }
+
+    /* ========== 底部导航 ========== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 40px);
+      max-width: 440px;
+      background: rgba(250, 247, 242, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 50px;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 16px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.03);
+      z-index: 100;
+      border: 1px solid rgba(200, 195, 188, 0.2);
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      padding: 8px 16px;
+      border-radius: 30px;
+      transition: all 0.3s ease;
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .nav-item.active {
+      color: var(--accent-mint);
+      background: rgba(176, 196, 184, 0.15);
+    }
+    .nav-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    /* ========== 页面切换动画 ========== */
+    .page {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .page.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ========== 首页元素 ========== */
+    .daily-quote {
+      text-align: center;
+      padding: 10px 0;
+    }
+    .quote-text {
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      color: var(--text-primary);
+    }
+    .mood-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .mood-btn {
+      flex: 1;
+      padding: 14px 8px;
+      border-radius: 50px;
+      text-align: center;
+      background: rgba(255,255,255,0.5);
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1.5px solid transparent;
+    }
+    .mood-btn.selected {
+      border-color: var(--accent-mint);
+      background: rgba(176, 196, 184, 0.1);
+      color: var(--accent-mint);
+    }
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .quick-item {
+      background: var(--bg-card);
+      backdrop-filter: var(--blur-bg);
+      border-radius: var(--radius-xl);
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(200, 195, 188, 0.15);
+    }
+
+    /* ========== 进度条 ========== */
+    .progress-bar {
+      height: 8px;
+      background: rgba(200, 195, 188, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-mint), var(--accent-blue));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    /* ========== 专注圆环 ========== */
+    .timer-ring {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      position: relative;
+      margin: 0 auto 24px;
+    }
+    .ring-bg {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(var(--accent-mint) 0deg, rgba(200,195,188,0.2) 0deg);
+      mask: radial-gradient(transparent 60%, black 62%);
+    }
+
+    /* 树洞动画 */
+    .entry-card {
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(70, 70, 68, 0.9);
+      color: white;
+      padding: 12px 28px;
+      border-radius: 40px;
+      font-size: 14px;
+      z-index: 999;
+      backdrop-filter: blur(10px);
+    }
+  </style>
+</head>
+<body>
+<div class="app-container" id="appContainer">
+  <!-- Toast -->
+  <div class="toast" id="toast" style="display:none;"></div>
+
+  <!-- 首页 -->
+  <div class="page active" id="page-home">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <span style="font-weight:500; color:var(--text-secondary);">治愈小岛</span>
+      <button class="btn btn-sm btn-outline" id="themeToggle">🌙 暗色模式</button>
+    </div>
+    <div class="card daily-quote">
+      <span class="quote-text" id="dailyQuote">慢慢来，比较快。</span>
+      <div style="margin-top:16px; cursor:pointer; font-size:13px; color:var(--text-secondary);" id="refreshQuote">🔄 换一句</div>
+    </div>
+    <div class="card">
+      <div style="font-weight:500; margin-bottom:16px;">今日心情打卡</div>
+      <div class="mood-buttons" id="moodButtons">
+        <div class="mood-btn" data-mood="happy">😊 开心</div>
+        <div class="mood-btn" data-mood="normal">😐 普通</div>
+        <div class="mood-btn" data-mood="anxious">😰 焦虑</div>
+        <div class="mood-btn" data-mood="procrastinate">🥱 拖延</div>
+      </div>
+    </div>
+    <div class="quick-actions">
+      <div class="quick-item" data-goto="tasks"><span style="font-size:28px;">📋</span><div>任务拆解</div></div>
+      <div class="quick-item" data-goto="focus"><span style="font-size:28px;">🧘</span><div>温柔专注</div></div>
+      <div class="quick-item" data-goto="treehole"><span style="font-size:28px;">🌳</span><div>情绪树洞</div></div>
+      <div class="quick-item" data-goto="data"><span style="font-size:28px;">📊</span><div>心情数据</div></div>
+    </div>
+  </div>
+
+  <!-- 任务页 -->
+  <div class="page" id="page-tasks">
+    <div class="card">
+      <div style="font-weight:500; margin-bottom:12px;">拆解大任务</div>
+      <div style="display:flex; gap:10px;">
+        <input type="text" id="taskInput" placeholder="如：学专业课、写简历..." style="flex:1;">
+        <button class="btn btn-sm" id="addTaskBtn">AI拆分</button>
+      </div>
+    </div>
+    <div id="taskList"></div>
+  </div>
+
+  <!-- 专注页 -->
+  <div class="page" id="page-focus">
+    <div class="card" style="text-align:center;">
+      <div class="timer-ring" id="timerRing"><div class="ring-bg" id="ringBg"></div><div style="position:relative; z-index:1; padding-top:70px;"><span style="font-size:42px; font-weight:300;" id="timerDisplay">25:00</span></div></div>
+      <div style="display:flex; gap:12px; justify-content:center; margin:20px 0;">
+        <button class="btn" id="startBtn">开始专注</button>
+        <button class="btn btn-outline" id="resetBtn">重置</button>
+      </div>
+      <div style="display:flex; gap:8px; justify-content:center;">
+        <span class="preset-btn" data-mins="10">10分</span>
+        <span class="preset-btn active" data-mins="25">25分</span>
+        <span class="preset-btn" data-mins="30">30分</span>
+      </div>
+      <div style="margin-top:20px; color:var(--text-secondary);">🌱 累计专注：<span id="totalFocus">0</span> 分钟</div>
+    </div>
+  </div>
+
+  <!-- 树洞页 -->
+  <div class="page" id="page-treehole">
+    <div class="card">
+      <div style="font-weight:500; margin-bottom:12px;">🌳 情绪树洞</div>
+      <textarea id="treeholeInput" placeholder="今天发生了什么？" maxlength="2000"></textarea>
+      <div style="display:flex; justify-content:space-between; margin-top:12px;">
+        <span style="color:var(--text-secondary);" id="charCount">0/2000</span>
+        <button class="btn btn-sm" id="sendTreehole">放进树洞</button>
+      </div>
+    </div>
+    <div id="treeholeList"></div>
+  </div>
+
+  <!-- 数据页 -->
+  <div class="page" id="page-data">
+    <div class="card" style="text-align:center;">
+      <div style="color:var(--text-secondary);">🌱 累计专注</div>
+      <span style="font-size:48px; font-weight:300;" id="dataFocus">0</span> 分钟
+    </div>
+    <div class="card">
+      <div style="margin-bottom:12px;">心情记录</div>
+      <div class="mood-strip" id="moodHistory"></div>
+    </div>
+    <button class="btn" style="width:100%;" id="backFromData">← 返回首页</button>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-page="home"><span class="nav-icon">🏠</span>首页</div>
+    <div class="nav-item" data-page="tasks"><span class="nav-icon">📋</span>任务</div>
+    <div class="nav-item" data-page="focus"><span class="nav-icon">🧘</span>专注</div>
+    <div class="nav-item" data-page="treehole"><span class="nav-icon">🌳</span>树洞</div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    // 存储
+    const STORE = 'healer_soft';
+    let data = { tasks:[], treehole:[], focusMin:0, mood:{}, isDark:false };
+    let focusTimer = null, focusRunning = false, focusRemain = 25*60, focusDur = 25;
+
+    function save() { localStorage.setItem(STORE, JSON.stringify(data)); }
+    function load() {
+      let s = localStorage.getItem(STORE);
+      if(s) try { data = {...data, ...JSON.parse(s)}; } catch(e){}
+      if(data.isDark) document.body.classList.add('dark-mode');
+    }
+    function toast(msg) {
+      let t = document.getElementById('toast');
+      t.textContent = msg; t.style.display='block';
+      setTimeout(()=> t.style.display='none', 2000);
+    }
+
+    // 页面切换
+    function switchPage(name) {
+      document.querySelectorAll('.page').forEach(p=> p.classList.remove('active'));
+      document.getElementById('page-'+name).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n=> n.classList.remove('active'));
+      document.querySelector(`.nav-item[data-page="${name}"]`).classList.add('active');
+      if(name==='tasks') renderTasks();
+      if(name==='treehole') renderTreehole();
+      if(name==='data') renderData();
+    }
+
+    // 任务逻辑
+    function addTask() {
+      let input = document.getElementById('taskInput');
+      let title = input.value.trim();
+      if(!title) return;
+      let steps = ['明确目标 (5分)','准备材料 (5分)','执行第一部分 (8分)','短暂休息 (3分)','检查进度 (5分)'];
+      data.tasks.unshift({ id:Date.now(), title, steps: steps.map((s,i)=>({id:i,text:s,done:false})) });
+      save(); renderTasks(); input.value=''; toast('任务已拆解');
+    }
+    function renderTasks() {
+      let list = document.getElementById('taskList');
+      list.innerHTML = data.tasks.map(t => {
+        let done = t.steps.filter(s=>s.done).length;
+        return `<div class="card"><b>${t.title}</b><div class="progress-bar"><div class="progress-fill" style="width:${(done/t.steps.length)*100}%"></div></div>
+        ${t.steps.map(s=>`<div style="padding:8px 0;cursor:pointer;" data-task="${t.id}" data-step="${s.id}">◯ ${s.text} ${s.done?'✓':''}</div>`).join('')}</div>`;
+      }).join('');
+    }
+
+    // 专注逻辑
+    function updateFocusUI() {
+      let m = Math.floor(focusRemain/60), s = focusRemain%60;
+      document.getElementById('timerDisplay').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      let deg = ((focusDur*60 - focusRemain)/(focusDur*60))*360;
+      document.getElementById('ringBg').style.background = `conic-gradient(var(--accent-mint) ${deg}deg, rgba(200,195,188,0.2) 0deg)`;
+    }
+
+    // 树洞逻辑
+    function sendTreehole() {
+      let input = document.getElementById('treeholeInput');
+      if(!input.value.trim()) return;
+      data.treehole.unshift({ id:Date.now(), text:input.value, reply:'我听到了你的声音，慢慢来。', time:new Date().toISOString() });
+      save(); renderTreehole(); input.value=''; toast('已放入树洞');
+    }
+    function renderTreehole() {
+      document.getElementById('treeholeList').innerHTML = data.treehole.map(e=>`
+        <div class="card entry-card"><div style="color:var(--text-secondary);">${new Date(e.time).toLocaleDateString()}</div>
+        <div style="margin:8px 0;">${e.text}</div><div style="background:rgba(176,196,184,0.1); padding:12px; border-radius:18px;">🌿 ${e.reply}</div></div>
+      `).join('');
+    }
+
+    function renderData() {
+      document.getElementById('dataFocus').textContent = data.focusMin;
+    }
+
+    // 事件绑定
+    document.getElementById('addTaskBtn').onclick = addTask;
+    document.getElementById('sendTreehole').onclick = sendTreehole;
+    document.getElementById('refreshQuote').onclick = ()=>{
+      let q = ['慢慢来，比较快。','你已经做得很好了。','温柔地对待自己。'];
+      document.getElementById('dailyQuote').textContent = q[Math.floor(Math.random()*q.length)];
+    };
+    document.getElementById('themeToggle').onclick = ()=>{
+      document.body.classList.toggle('dark-mode');
+      data.isDark = !data.isDark; save();
+    };
+    document.querySelectorAll('.nav-item').forEach(n=> n.onclick = ()=> switchPage(n.dataset.page));
+    document.querySelectorAll('.quick-item').forEach(q=> q.onclick = ()=> switchPage(q.dataset.goto));
+    
+    document.getElementById('startBtn').onclick = ()=>{
+      if(focusRunning) { clearInterval(focusTimer); focusRunning=false; return; }
+      focusRunning=true;
+      focusTimer = setInterval(()=>{
+        if(focusRemain<=1){ clearInterval(focusTimer); data.focusMin+=focusDur; save(); toast('专注结束，辛苦了'); focusRemain=focusDur*60; updateFocusUI(); return; }
+        focusRemain--; updateFocusUI();
+      },1000);
+    };
+    document.getElementById('resetBtn').onclick = ()=>{ clearInterval(focusTimer); focusRunning=false; focusRemain=focusDur*60; updateFocusUI(); };
+
+    load();
+    updateFocusUI();
+  })();
+</script>
+</body>
+</html>
